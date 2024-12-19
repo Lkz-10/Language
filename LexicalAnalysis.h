@@ -8,7 +8,10 @@
 
 #include "LanguageGlobals.h"
 
-int FillTokens (tokens_t* tokens, const buffer_t* buffer);
-int IsKeyWord  (char** word);
+int FillTokens  (tokens_t* tokens, const buffer_t* buffer);
+int IsKeyWord   (char** word);
+int SkipRubbish (char** curr_ptr, const char* end_ptr);
+int TokensCtor  (tokens_t* tokens, int size);
+int TokensDtor  (tokens_t* tokens);
 
 #endif

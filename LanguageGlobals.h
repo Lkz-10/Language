@@ -13,34 +13,36 @@ struct op_t
     int         code;
 };
 
-const int OP_CNT = 10;
+const int OP_CNT = 12;
 
-const op_t operations[OP_CNT] = {{"+", 1},   {"-", 2},   {"*", 3}, {"/", 4}, {"=", 5}, {"(", 6},{")", 7},
-                                 {"sin", 8}, {"cos", 9}, {"if", 10}};
+const op_t operations[OP_CNT] = {{"+", 1},   {"-", 2},   {"*", 3},   {"/", 4}, {"=", 5}, {"(", 6},{")", 7},
+                                 {"sin", 8}, {"cos", 9}, {"if", 10}, {"$", 11}, {";", 12}};
 
 enum types_t
 {
-    NUM = 0,
-    ID  = 1,
-    OP  = 2
+    NUM = 1,
+    ID  = 2,
+    OP  = 3
 };
 
 const int ID_MAX_NAME_LEN = 10;
 
-struct token_t
+struct Node_t
 {
     types_t type;
-    char    id[ID_MAX_NAME_LEN];
-    int     code;
-    double  num;
+    char    id_val[ID_MAX_NAME_LEN];
+    int     op_val;
+    double  num_val;
+    Node_t* left;
+    Node_t* right;
 };
-
-const int MAX_TOKENS_CNT = 20;
 
 struct tokens_t
 {
-    int     cnt = 0;
-    token_t array[MAX_TOKENS_CNT];
+    int     cnt;
+    int     curr_ptr;
+    int     size;
+    Node_t* array;
 };
 
 enum return_codes

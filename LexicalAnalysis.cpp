@@ -8,42 +8,36 @@ int FillTokens(tokens_t* tokens, const buffer_t* buffer)
         return -1;
     }
 
-    char* cur_ptr = buffer->data;
+    char* curr_ptr = buffer->data;
 
-    while (cur_ptr < buffer->data + buffer->size)
+    while (curr_ptr < buffer->data + buffer->size)
     {
-        if (tokens->cnt >= MAX_TOKENS_CNT)
+        SkipRubbish(&curr_ptr, buffer->data + buffer->size);
+
+        if (curr_ptr >= buffer->data + buffer->size) break;
+
+        if (isdigit(*curr_ptr))
         {
-            fprintf(stderr, "Error: too many tokens(max %d)!\n", MAX_TOKENS_CNT);
-            return ERROR;
-        }
-
-        while (isspace(*cur_ptr)) cur_ptr++;
-
-        if (cur_ptr >= buffer->data + buffer->size) break;
-
-        if (isdigit(*cur_ptr))
-        {
-            double num = strtod(cur_ptr, &cur_ptr);
+            double num = strtod(curr_ptr, &curr_ptr);
 
             tokens->array[tokens->cnt].type = NUM;
-            tokens->array[tokens->cnt].num  = num;
+            tokens->array[tokens->cnt].num_val  = num;
 
             (tokens->cnt)++;
 
-            //printf("New num: %lg\n",  tokens->array[tokens->cnt].num);
+            //printf("New num: %lg\n",  tokens->array[tokens->cnt].num_val);
 
             continue;
         }
 
-        int word_code = IsKeyWord(&cur_ptr);
+        int word_code = IsKeyWord(&curr_ptr);
 
         if (word_code < 0) return ERROR;
 
         if (word_code > 0)
         {
             tokens->array[tokens->cnt].type = OP;
-            tokens->array[tokens->cnt].code = word_code;
+            tokens->array[tokens->cnt].op_val = word_code;
 
             (tokens->cnt)++;
 
@@ -55,24 +49,24 @@ int FillTokens(tokens_t* tokens, const buffer_t* buffer)
             continue;
         }
 
-        if (isalpha(*cur_ptr))
+        if (isalpha(*curr_ptr))
         {
             tokens->array[tokens->cnt].type = ID;
 
             int id_name_len = 0;
 
-            sscanf(cur_ptr, "%s%n", tokens->array[tokens->cnt].id, &id_name_len);
+            sscanf(curr_ptr, "%s%n", tokens->array[tokens->cnt].id_val, &id_name_len);
 
-            cur_ptr += id_name_len;
+            curr_ptr += id_name_len;
 
             (tokens->cnt)++;
 
-            //printf("New id: %s\n", tokens->array[tokens->cnt].id);
+            //printf("New id: %s\n", tokens->array[tokens->cnt].id_val);
 
             continue;
         }
 
-        fprintf(stderr, "FillTokens() error: unknown token(%s)\n", cur_ptr);
+        fprintf(stderr, "FillTokens() error: unknown token(%s), curr_ptr = %p\nprev: %s", curr_ptr, curr_ptr, curr_ptr - 2);
 
         return ERROR;
     }
@@ -117,4 +111,68 @@ int IsKeyWord(char** word)
     (*word) -= size;
 
     return 0;
+}
+
+int SkipRubbish(char** curr_ptr, const char* end_ptr)
+{
+    if (!curr_ptr || !end_ptr)
+    {
+        fprintf(stderr, "SkipRubbish() error: curr_ptr(%p), end_ptr(%p)!\n", curr_ptr, end_ptr);
+        return ERROR;
+    }
+
+    while (*curr_ptr < end_ptr && isspace(**curr_ptr)) (*curr_ptr)++;
+
+    if (*curr_ptr < end_ptr && **curr_ptr == '~')
+    {
+        (*curr_ptr)++;
+
+        while (*curr_ptr < end_ptr && **curr_ptr != '~') (*curr_ptr)++;
+
+        (*curr_ptr)++;
+
+        SkipRubbish(curr_ptr, end_ptr);
+    }
+
+    return OK;
+}
+
+int TokensCtor(tokens_t* tokens, int size)
+{
+    if (!tokens)
+    {
+        fprintf(stderr, "TokensCtor() error: null-pointer!\n");
+        return ERROR;
+    }
+
+    tokens->cnt      = 0;
+    tokens->curr_ptr = 0;
+    tokens->size     = size;
+
+    tokens->array = (Node_t*) calloc(size, sizeof(Node_t));
+
+    if (!tokens->array)
+    {
+        fprintf(stderr, "TokensCtor() memory error!\n");
+        return ERROR;
+    }
+
+    return OK;
+}
+
+int TokensDtor(tokens_t* tokens)
+{
+    if (!tokens)
+    {
+        fprintf(stderr, "TokensDtor() error: null-pointer!\n");
+        return ERROR;
+    }
+
+    tokens->cnt      = 0;
+    tokens->curr_ptr = 0;
+
+    free(tokens->array);
+    tokens->array = NULL;
+
+    return OK;
 }
