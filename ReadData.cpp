@@ -34,8 +34,6 @@ int ReadData(const char* file_name, buffer_t* buffer)
         return ERROR;
     }
 
-    fprintf(stderr, "\nBefore fread():\ndata: %s\nsize: %d\n\n", buffer->data, buffer->size);
-
     if ((long int) fread(buffer->data, sizeof(char), buffer->size, file_ptr) < buffer->size)
     {
         fprintf(stderr, "Reading error!\n");

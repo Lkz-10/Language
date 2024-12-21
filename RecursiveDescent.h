@@ -15,6 +15,7 @@ Node_t* GetP          (tokens_t* tokens);
 Node_t* GetT          (tokens_t* tokens);
 Node_t* GetE          (tokens_t* tokens);
 Node_t* GetAssignment (tokens_t* tokens);
+Node_t* GetOperation  (tokens_t* tokens);
 Node_t* GetGrammar    (tokens_t* tokens);
 int     OperatorCode  (const char* _operator);
 

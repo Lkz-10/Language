@@ -31,7 +31,7 @@ Node_t* GetVariable(tokens_t* tokens)
         return NULL;
     }
 
-    fprintf(stderr, "Variable \"%s\" got!\n", tokens->array[tokens->curr_ptr].id_val);
+    // fprintf(stderr, "Variable \"%s\" got!\n", tokens->array[tokens->curr_ptr].id_val);
 
     return &tokens->array[(tokens->curr_ptr)++];
 }
@@ -46,13 +46,13 @@ Node_t* GetFunction(tokens_t* tokens)
 
     Node_t* function = &tokens->array[tokens->curr_ptr];
 
-    fprintf(stderr, "Function \"%s\" got!\n", tokens->array[tokens->curr_ptr].id_val);
+    // fprintf(stderr, "Function \"%s\" got!\n", tokens->array[tokens->curr_ptr].id_val);
 
     tokens->curr_ptr += 2;
 
     function->left = GetE(tokens);
 
-    if (tokens->array[(tokens->curr_ptr)++].op_val != OperatorCode(")")) SyntaxError(tokens, ")");
+    if (tokens->array[(tokens->curr_ptr)++].op_val != OperatorCode("whistle")) SyntaxError(tokens, ")");
 
     return function;
 }
@@ -65,29 +65,29 @@ Node_t* GetP(tokens_t* tokens)
         return NULL;
     }
 
-    if (tokens->array[tokens->curr_ptr].op_val == OperatorCode("("))
+    if (tokens->array[tokens->curr_ptr].op_val == OperatorCode("start"))
     {
         (tokens->curr_ptr)++;
 
         Node_t* value = GetE(tokens);
 
-        if (tokens->array[tokens->curr_ptr].op_val != OperatorCode(")")) SyntaxError(tokens, ")");
+        if (tokens->array[tokens->curr_ptr].op_val != OperatorCode("whistle")) SyntaxError(tokens, ")");
 
         (tokens->curr_ptr)++;
 
         return value;
     }
 
-    if (/*tokens->array[tokens->curr_ptr].type == ID &&*/ tokens->curr_ptr < tokens->cnt - 1 &&
-        tokens->array[tokens->curr_ptr + 1].op_val == OperatorCode("("))
+    if (tokens->curr_ptr < tokens->cnt - 1 &&
+        tokens->array[tokens->curr_ptr + 1].op_val == OperatorCode("start"))
     {
-        fprintf(stderr, "Going to GetFunction()!\n");
+        // fprintf(stderr, "Going to GetFunction()!\n");
         return GetFunction(tokens);
     }
 
     if (tokens->array[tokens->curr_ptr].type == ID)
     {
-        fprintf(stderr, "Going to GetVariable()!\n");
+        // fprintf(stderr, "Going to GetVariable()!\n");
         return GetVariable(tokens);
     }
 
@@ -104,8 +104,8 @@ Node_t* GetT(tokens_t* tokens)
 
     Node_t* value = GetP(tokens);
 
-    while (tokens->array[tokens->curr_ptr].op_val == OperatorCode("*") ||
-           tokens->array[tokens->curr_ptr].op_val == OperatorCode("/"))
+    while (tokens->array[tokens->curr_ptr].op_val == OperatorCode("star") ||
+           tokens->array[tokens->curr_ptr].op_val == OperatorCode("goalkeeper"))
     {
         Node_t* _operator = &tokens->array[tokens->curr_ptr];
 
@@ -132,8 +132,8 @@ Node_t* GetE(tokens_t* tokens)
 
     Node_t* value = GetT(tokens);
 
-    while (tokens->array[tokens->curr_ptr].op_val == OperatorCode("+") ||
-           tokens->array[tokens->curr_ptr].op_val == OperatorCode("-"))
+    while (tokens->array[tokens->curr_ptr].op_val == OperatorCode("win") ||
+           tokens->array[tokens->curr_ptr].op_val == OperatorCode("lose"))
     {
         Node_t* _operator = &tokens->array[tokens->curr_ptr];
 
@@ -170,6 +170,76 @@ Node_t* GetAssignment(tokens_t* tokens)
     return _operator;
 }
 
+Node_t* GetOperation(tokens_t* tokens)
+{
+    if (!tokens)
+    {
+        fprintf(stderr, "GetOp() error: null-pointer!\n");
+        return NULL;
+    }
+
+    Node_t* _operator = NULL;
+
+    if (tokens->array[tokens->curr_ptr].op_val == OperatorCode("VAR"))
+    {
+        _operator = &tokens->array[(tokens->curr_ptr)++];
+
+        if (tokens->array[(tokens->curr_ptr)++].op_val != OperatorCode("start")) SyntaxError(tokens, "(");
+
+        _operator->left = GetE(tokens);
+
+        if (tokens->array[(tokens->curr_ptr)++].op_val != OperatorCode("whistle")) SyntaxError(tokens, ")");
+
+        _operator->right = GetOperation(tokens);
+    }
+
+    else if (tokens->array[tokens->curr_ptr].op_val == OperatorCode("broadcast"))
+    {
+        _operator = &tokens->array[(tokens->curr_ptr)++];
+
+        if (tokens->array[(tokens->curr_ptr)++].op_val != OperatorCode("start")) SyntaxError(tokens, "(");
+
+        _operator->left = GetE(tokens);
+
+        if (tokens->array[(tokens->curr_ptr)++].op_val != OperatorCode("whistle")) SyntaxError(tokens, ")");
+    }
+
+    else if (tokens->array[tokens->curr_ptr].op_val == OperatorCode("July"))
+    {
+        (tokens->curr_ptr)++;
+
+        _operator = GetOperation(tokens);
+
+        Node_t* root_operator = _operator;
+
+        while (tokens->curr_ptr < tokens->cnt - 1 && tokens->array[tokens->curr_ptr].op_val != OperatorCode("May"))
+        {
+            _operator->right = GetOperation(tokens);
+
+            _operator = _operator->right;
+        }
+
+        (tokens->curr_ptr)++;
+        //if (tokens->array[tokens->curr_ptr].op_val != OperatorCode("May")) SyntaxError(tokens, "}");
+
+        return root_operator;
+    }
+
+    else if (tokens->curr_ptr < tokens->cnt - 1 &&
+                tokens->array[tokens->curr_ptr + 1].op_val == OperatorCode("draw"))
+    {
+        _operator = GetAssignment(tokens);
+    }
+
+    else SyntaxError(tokens, "Operator");
+
+    if (tokens->array[tokens->curr_ptr].op_val != OperatorCode("Break")) SyntaxError(tokens, ";");
+
+    tokens->array[tokens->curr_ptr].left = _operator;
+
+    return &tokens->array[(tokens->curr_ptr)++];
+}
+
 Node_t* GetGrammar(tokens_t* tokens)
 {
      if (!tokens)
@@ -178,36 +248,24 @@ Node_t* GetGrammar(tokens_t* tokens)
         return NULL;
     }
 
-    Node_t* value = GetAssignment(tokens);
+    Node_t* root = GetOperation(tokens);
 
-    if (tokens->array[tokens->curr_ptr].op_val != OperatorCode(";")) SyntaxError(tokens, ";");
+    Node_t* _operator = root;
 
-    Node_t* _operator = &tokens->array[(tokens->curr_ptr)++];
+    //fprintf(stderr, "GetG() curr_ptr = %d\n", tokens->curr_ptr + 1);
 
-    Node_t* root = _operator;
-
-    _operator->left = value;
-
-    fprintf(stderr, "GetG() curr_ptr = %d\n", tokens->curr_ptr + 1);
-
-    while (tokens->curr_ptr < tokens->cnt && tokens->array[tokens->curr_ptr].op_val != OperatorCode("$"))
+    while (tokens->curr_ptr < tokens->cnt && tokens->array[tokens->curr_ptr].op_val != OperatorCode("PSG"))
     {
-        fprintf(stderr, "GetG() curr_ptr = %d\n", tokens->curr_ptr + 1);
+        //fprintf(stderr, "GetG() curr_ptr = %d\n", tokens->curr_ptr + 1);
 
-        value = GetAssignment(tokens);
+        _operator->right = GetOperation(tokens);
 
-        fprintf(stderr, "GetG() curr_ptr (after GetA()) = %d\n", tokens->curr_ptr + 1);
-
-        if (tokens->array[tokens->curr_ptr].op_val != OperatorCode(";")) SyntaxError(tokens, ";");
-
-        _operator->right = &tokens->array[(tokens->curr_ptr)++];
+        //fprintf(stderr, "GetG() curr_ptr (after GetA()) = %d\n", tokens->curr_ptr + 1);
 
         _operator = _operator->right;
-
-        _operator->left = value;
     }
 
-    if (tokens->array[tokens->curr_ptr].op_val != OperatorCode("$")) SyntaxError(tokens, "$");
+    if (tokens->array[tokens->curr_ptr].op_val != OperatorCode("PSG")) SyntaxError(tokens, "$");
 
     (tokens->curr_ptr)++;
 

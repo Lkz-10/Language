@@ -1,31 +1,19 @@
-#include <stdio.h>
-#include <stdlib.h>
-
-#include "LanguageGlobals.h"
-#include "ReadData.h"
-#include "LexicalAnalysis.h"
-#include "RecursiveDescent.h"
-#include "DrawTree.h"
+#include "LanguageHeaders.h"
 
 int PrintTokens(tokens_t* tokens);
+int CheckArgc  (const int argc, const char** argv);
 
 int main(const int argc, const char** argv)
 {
-    if (argc < 3)
-    {
-        fprintf(stderr, "Enter the file name!\n argv[0] = %s\n", argv[0]);
-        return ERROR;
-    }
+    CheckArgc(argc, argv);
 
     buffer_t buffer = {};
-
     ReadData(argv[1], &buffer);
 
     tokens_t tokens = {};
-
     TokensCtor(&tokens, buffer.size);
 
-    printf("\nbuffer size: %d\nbuffer: %s\n", buffer.size, buffer.data);
+    // printf("\nbuffer size: %d\nbuffer: %s\n", buffer.size, buffer.data);
 
     FillTokens(&tokens, &buffer);
 
@@ -33,7 +21,7 @@ int main(const int argc, const char** argv)
 
     Node_t* root = GetGrammar(&tokens);
 
-    printf("Root: %p\n", root);
+    // printf("Root: %p\n", root);
 
     DrawTree(root, argv[2]);
 
@@ -49,13 +37,13 @@ int PrintTokens(tokens_t* tokens)
 
     for (int i = 0; i < tokens->size; ++i)
     {
-        fprintf(file_ptr, "%2d ", i + 1);
+        fprintf(file_ptr, "%6d ", i + 1);
     }
     fprintf(file_ptr, "\n");
 
     for (int i = 0; i < tokens->size; ++i)
     {
-        fprintf(file_ptr, "%2d ", tokens->array[i].type);
+        fprintf(file_ptr, "%6d ", tokens->array[i].type);
     }
     fprintf(file_ptr, "\n");
 
@@ -63,17 +51,17 @@ int PrintTokens(tokens_t* tokens)
     {
         if (tokens->array[i].type == ID)
         {
-            fprintf(file_ptr, "%2s ", tokens->array[i].id_val);
+            fprintf(file_ptr, "%6s ", tokens->array[i].id_val);
         }
 
         else if (tokens->array[i].type == NUM)
         {
-            fprintf(file_ptr, "%2lg ", tokens->array[i].num_val);
+            fprintf(file_ptr, "%6lg ", tokens->array[i].num_val);
         }
 
         else if (tokens->array[i].type == OP)
         {
-            fprintf(file_ptr, "%2d ", tokens->array[i].op_val);
+            fprintf(file_ptr, "%6d ", tokens->array[i].op_val);
         }
         else fprintf(file_ptr, "   ");
     }
@@ -82,4 +70,15 @@ int PrintTokens(tokens_t* tokens)
     fclose(file_ptr);
 
     return 0;
+}
+
+int CheckArgc(const int argc, const char** argv)
+{
+    if (argc < 3)
+    {
+        fprintf(stderr, "Enter the file name!\n argv[0] = %s\n", argv[0]);
+        return ERROR;
+    }
+
+    return OK;
 }

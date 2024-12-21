@@ -13,10 +13,12 @@ struct op_t
     int         code;
 };
 
-const int OP_CNT = 12;
+const int OP_CNT = 17;
 
-const op_t operations[OP_CNT] = {{"+", 1},   {"-", 2},   {"*", 3},   {"/", 4}, {"=", 5}, {"(", 6},{")", 7},
-                                 {"sin", 8}, {"cos", 9}, {"if", 10}, {"$", 11}, {";", 12}};
+const op_t operations[OP_CNT] = {{"win", 1},   {"lose", 2},   {"star", 3}, {"goalkeeper", 4}, {"draw", 5},
+                                 {"start", 6}, {"whistle", 7}, {"sin", 8},  {"cos", 9}, {"VAR", 10},
+                                 {"PSG", 11},  {"Break", 12}, {"broadcast", 13}, {"July", 14},
+                                 {"May", 15},  {"uefa", 16},  {"double", 17}};
 
 enum types_t
 {

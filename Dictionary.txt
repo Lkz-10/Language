@@ -1,0 +1,21 @@
+"broadcast"  -- "printf"
+"VAR"        -- "if"
+"win"        -- "+"
+"lose"       -- "-"
+"star"       -- "*"
+"goalkeeper" -- "/"
+"draw"       -- "="
+"start"      -- "("
+"whistle"    -- ")"
+"PSG"        -- "$"
+"Break"      -- ";"
+"July"       -- "{"
+"May"        -- "}"
+"uefa"       -- "sqrt"
+"Double"     -- "sqr"
+
+VAR start ucl goalkeeper 3 whistle
+July ucl draw 3 Break
+broadcast start ucl star 2 whistle Break
+May Break
+PSG
